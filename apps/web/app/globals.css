@@ -1,13 +1,32 @@
 @import "tailwindcss";
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf8ff;
+  --foreground: #1c1917;
+  /* soft pastel accents (use in custom CSS or arbitrary values) */
+  --pastel-rose: #ffe4e6;
+  --pastel-lavender: #ede9fe;
+  --pastel-mint: #d1fae5;
+  --pastel-peach: #ffedd5;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0c0a12;
+    --foreground: #e7e5e4;
+  }
+
+  body {
+    background-image: radial-gradient(
+        ellipse 120% 80% at 100% 0%,
+        rgba(91, 33, 182, 0.35) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 100% 60% at 0% 100%,
+        rgba(157, 23, 77, 0.2) 0%,
+        transparent 50%
+      ),
+      linear-gradient(180deg, #0c0a12 0%, #1c1917 100%);
   }
 }
 
@@ -20,6 +39,18 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
+  background-image: radial-gradient(
+      ellipse 120% 80% at 100% 0%,
+      var(--pastel-lavender) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 100% 60% at 0% 100%,
+      var(--pastel-rose) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, #faf8ff 0%, #f5f3ff 100%);
+  background-attachment: fixed;
 }
 
 * {
@@ -47,5 +78,16 @@ a {
   }
   .imgDark {
     display: unset;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  .animate-pulse {
+    animation: none !important;
+    opacity: 0.65;
   }
 }
