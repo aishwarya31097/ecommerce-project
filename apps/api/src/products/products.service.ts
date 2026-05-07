@@ -42,13 +42,24 @@ export class ProductsService {
           }
         : {}),
     };
+    const sortBy = query.sortBy ?? 'createdAt';
+    const sortOrder = query.sortOrder ?? 'desc';
 
     const [items, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortBy]: sortOrder },
+         include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -60,6 +71,8 @@ export class ProductsService {
         pageSize,
         total,
         totalPages: Math.ceil(total / pageSize),
+        sortBy,
+        sortOrder,
       },
     };
   }
