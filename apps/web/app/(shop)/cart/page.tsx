@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CartQuantityDemo } from "@/components/cart-quantity-demo";
+import { CartLineItem } from "./_components/cart-line-item";
 import { CartEmptyState } from "./_components/cart-empty-state";
+import { getCart } from "@/lib/api/cart";
+import { ApiError } from "@/lib/api/client";
+import { getDemoUserId } from "@/lib/demo-user";
 
 export const metadata: Metadata = {
   title: "Cart",
@@ -12,7 +15,49 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CartPage() {
+export const dynamic = "force-dynamic";
+
+function formatMoney(n: number) {
+  return `€${n.toFixed(2)}`;
+}
+
+export default async function CartPage() {
+  let cart: Awaited<ReturnType<typeof getCart>>;
+  try {
+    const userId = getDemoUserId();
+    cart = await getCart(userId, { revalidateSeconds: 0 });
+  } catch (e) {
+    const message =
+      e instanceof ApiError
+        ? e.message
+        : e instanceof Error
+          ? e.message
+          : "Could not load cart.";
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-50">
+          Cart
+        </h1>
+        <div
+          className="mt-8 rounded-2xl border border-red-200/90 bg-red-50/50 p-6 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200"
+          role="alert"
+        >
+          {message}
+        </div>
+        <p className="mt-8 text-center text-sm text-zinc-500">
+          <Link
+            href="/products"
+            className="font-medium text-violet-700 underline-offset-4 hover:underline dark:text-violet-300"
+          >
+            Continue shopping
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  const empty = cart.items.length === 0;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <header className="max-w-xl">
@@ -23,39 +68,37 @@ export default function CartPage() {
           Cart
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-          Empty-state UX ships early so Day 9 only plugs data into shells you
-          already like.
+          Items are saved for your demo account until checkout ships.
         </p>
       </header>
 
-      <div className="mt-8 space-y-10">
-        <CartEmptyState />
-
-        <section
-          aria-labelledby="cart-preview-heading"
-          className="rounded-2xl border border-dashed border-violet-200/90 bg-violet-50/40 p-6 dark:border-violet-900/50 dark:bg-violet-950/25"
-        >
-          <h2
-            id="cart-preview-heading"
-            className="text-sm font-semibold text-zinc-800 dark:text-zinc-200"
-          >
-            Interactive preview
-          </h2>
-          <p className="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-            The row below is a{" "}
-            <strong className="font-medium text-zinc-700 dark:text-zinc-300">
-              client component
-            </strong>{" "}
-            (<code className="rounded bg-white/80 px-1 py-0.5 font-mono text-[0.65rem] dark:bg-zinc-900">
-              useState
-            </code>
-            ). Quantity stays in the browser until you persist it with APIs +
-            cookies later.
-          </p>
-          <div className="mt-5">
-            <CartQuantityDemo />
-          </div>
-        </section>
+      <div className="mt-8">
+        {empty ? (
+          <CartEmptyState />
+        ) : (
+          <>
+            <ul className="list-none rounded-2xl border border-white/70 bg-white/65 p-4 shadow-sm shadow-violet-900/5 backdrop-blur-sm dark:border-zinc-800/80 dark:bg-zinc-950/55 sm:p-6">
+              {cart.items.map((item) => (
+                <CartLineItem key={item.id} item={item} />
+              ))}
+            </ul>
+            <div className="mt-8 rounded-2xl border border-violet-200/80 bg-violet-50/40 p-6 dark:border-violet-900/40 dark:bg-violet-950/25">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Subtotal ({cart.summary.itemCount}{" "}
+                  {cart.summary.itemCount === 1 ? "item" : "items"})
+                </span>
+                <span className="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                  {formatMoney(cart.summary.subtotal)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
+                Demo checkout coming later — totals update when you change
+                quantities.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <p className="mt-10 text-center text-sm text-zinc-500 dark:text-zinc-500">

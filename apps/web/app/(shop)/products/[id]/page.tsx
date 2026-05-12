@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ApiError } from '@/lib/api/client';
 import { getProductById } from '@/lib/api/products';
+import { AddToCartButton } from '@/components/cart/add-to-cart-button';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -55,9 +56,15 @@ export default async function ProductDetailPage({ params }: Props) {
         <p className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
           {product.description}
         </p>
-        <p className="mt-10 rounded-xl border border-dashed border-violet-200/80 bg-white/50 p-4 text-sm text-zinc-500 dark:border-violet-900/50 dark:bg-zinc-950/40 dark:text-zinc-500">
-          Live API detail page.
-        </p>
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <AddToCartButton productId={product.id} />
+          <Link
+            href="/cart"
+            className="text-sm font-medium text-violet-700 underline-offset-4 hover:underline dark:text-violet-300"
+          >
+            View cart
+          </Link>
+        </div>
       </div>
     );
   } catch (error) {

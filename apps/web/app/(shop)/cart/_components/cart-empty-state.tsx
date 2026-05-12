@@ -10,9 +10,8 @@ export function CartEmptyState() {
         Your cart is empty
       </h2>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-        Nothing persisted yet — cart APIs land around Day 7 in your roadmap;
-        the storefront wiring is Day 9. Until then, this is the real empty
-        state users will see.
+        Add something from the catalog — your selections appear here for your
+        demo shopper account.
       </p>
       <Link
         href="/products"
