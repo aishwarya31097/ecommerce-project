@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { OrderStatus, Prisma } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateOrderFromCartDto } from './dto/create-order-from-cart.dto';
 

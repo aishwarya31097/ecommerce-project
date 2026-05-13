@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: product.description,
       },
     };
-  } catch (error) {
+  } catch {
     return { title: 'Product' };
   }
 }
