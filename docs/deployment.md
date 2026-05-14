@@ -151,6 +151,15 @@ If logs say **`Environment variable not found: DATABASE_URL`**:
 3. If the URL lives on MySQL, add **`DATABASE_URL`** on the API service and set its value with **Variable reference** → choose the MySQL plugin → the variable that holds the full `mysql://...` URL.
 4. **Redeploy** after saving (Railway injects env at container start).
 
+### Railway: `nest start` / `Cannot find module '.../dist/main'`
+
+Railway was probably running the **`start`** script (`nest start`), which expects a **pre-built** `dist/` folder. This repo now sets **`start`** to **`node dist/main.js`** (same as production) so a mistaken **`pnpm --filter api run start`** still runs compiled code.
+
+You still need a **build** before start:
+
+- **Dockerfile deploy:** the image runs `pnpm run build:api` during the image build; then `node dist/main.js` at runtime.
+- **Non-Docker (Railpack):** ensure a **Build** step runs `pnpm run build:api` (or use the Dockerfile). If the platform only runs `pnpm install` then `start`, `dist/` will be missing → same error until you add a build phase or switch to Docker.
+
 ### Credits
 
 Railway is usage-based; watch the **Usage** tab so a sleeping MySQL + API does not surprise you on a hobby budget.
