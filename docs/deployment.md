@@ -134,6 +134,33 @@ pnpm --filter api exec prisma migrate deploy
 
 Then seed or create a user and copy **`users.id`** for **`NEXT_PUBLIC_DEMO_USER_ID`** on Vercel.
 
+### Verify the API and Prisma (after deploy)
+
+1. **Root (no DB query)** — in a browser or terminal:
+   - `GET https://<your-railway-url>/`  
+   You should see a plain hello string from `AppController`.
+
+2. **Health (Prisma + MySQL)** — this proves **`DATABASE_URL`** and Prisma can talk to the DB:
+   - `GET https://<your-railway-url>/health`  
+   Expect JSON like `{ "status": "ok", "database": "connected" }`.  
+   If this **500s** or errors, Prisma cannot reach MySQL (wrong URL, SSL, firewall, or DB down).
+
+3. **Real data (tables exist)** — only works after **`prisma migrate deploy`** (see Step 5):
+   - `GET https://<your-railway-url>/products?page=1&pageSize=5`  
+   Expect JSON with `items` (maybe empty `[]` if you have not seeded products yet).  
+   A **500** or Prisma error about missing table means migrations were not applied to this database.
+
+### Prisma checklist for production
+
+| Step | Command / action | When |
+| ---- | ----------------- | ---- |
+| 1 | `pnpm --filter api exec prisma migrate deploy` | **Once** per new database (Railway **Shell** on the API service, or your laptop with prod `DATABASE_URL`). Creates/updates tables from `prisma/migrations`. |
+| 2 | `pnpm --filter api run db:seed` | **Optional** — only if your seed is safe for prod and you want demo users/products. |
+| 3 | Confirm a **User** exists | Copy `id` → Vercel **`NEXT_PUBLIC_DEMO_USER_ID`**. |
+| 4 | **`/health`** returns ok | Confirms runtime DB connectivity anytime. |
+
+**Note:** Do not use `prisma migrate dev` against production; use **`migrate deploy`** only.
+
 ### Step 6 — Vercel env + redeploy
 
 Set **`NEXT_PUBLIC_API_URL`** to the Railway API URL and **`NEXT_PUBLIC_DEMO_USER_ID`** to that user id → **Redeploy** production on Vercel.

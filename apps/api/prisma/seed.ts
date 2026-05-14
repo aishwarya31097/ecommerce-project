@@ -1,4 +1,13 @@
-import { OrderStatus, PrismaClient } from "@prisma/client";
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { config } from 'dotenv';
+import { OrderStatus, PrismaClient } from '@prisma/client';
+
+// Same as migrate script: shell DATABASE_URL="" on Windows must not override apps/api/.env
+config({
+  path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env'),
+  override: true,
+});
 
 const prisma = new PrismaClient();
 
