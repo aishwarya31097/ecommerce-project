@@ -76,3 +76,69 @@ CORS_ORIGINS=https://your-app.vercel.app
 
 - **CI** in this repo = GitHub Actions → lint, types, build.
 - **CD / hosting** = you choose Vercel + a Node host + DB; use HTTPS URLs and env vars; tighten CORS for production.
+
+---
+
+## Railway: API + MySQL only (frontend stays on Vercel)
+
+Same GitHub repo is used everywhere. **Vercel** deploys `apps/web` only (you set Root Directory there). **Railway** deploys **only the Nest API** using the root **`Dockerfile`** + **`railway.toml`** in this repo — the image never starts Next.
+
+### What gets deployed where
+
+| Where   | What runs | How this repo enforces it |
+| ------- | --------- | ------------------------- |
+| Vercel  | Next.js `apps/web` | Vercel project root = `apps/web` |
+| Railway | Nest `apps/api` + MySQL plugin | **`railway.toml`** → Docker build → **`CMD`** runs `pnpm --filter api run start:prod` |
+
+### Step 1 — Commit and push
+
+Ensure these files are on `main` (or your deploy branch): **`Dockerfile`**, **`.dockerignore`**, **`railway.toml`**, and root **`package.json`** (with `build:api` and `start`).
+
+### Step 2 — New Railway project
+
+1. [railway.app](https://railway.app) → **New project** → **Deploy from GitHub repo** → select this repository.
+2. Railway may create one service from the repo. That becomes your **API** service (rename it to `api` if you like).
+
+### Step 3 — MySQL
+
+1. In the project canvas → **+ New** → **Database** → **MySQL** (or add MySQL from templates).
+2. Open the **MySQL** service → copy or **reference** the connection URL into your API service as **`DATABASE_URL`** (Railway’s “Variable reference” from MySQL → API is ideal).
+
+### Step 4 — API service settings
+
+1. Click the **API** service (GitHub-connected).
+2. **Settings → Source** (or **Deploy**): confirm the repo and branch match what you push.
+3. **Build**: with **`railway.toml`**, Railway should use **Dockerfile** automatically. If the UI still uses Railpack/Nixpacks, switch **Builder** to **Dockerfile** and set path **`Dockerfile`** at repo root.
+4. **Variables** on the **API** service (not MySQL):
+
+   | Name | Value |
+   | ---- | ----- |
+   | `DATABASE_URL` | Reference from MySQL service, or paste `mysql://...` |
+   | `CORS_ORIGINS` | Your Vercel URL, e.g. `https://your-app.vercel.app` |
+
+   Do **not** set `PORT` unless Railway docs say so — Railway injects **`PORT`**; Nest uses it.
+
+5. **Networking** → **Generate domain** → copy the HTTPS URL (your **`NEXT_PUBLIC_API_URL`** on Vercel).
+
+### Step 5 — Database schema (once per environment)
+
+After the first successful deploy (container runs), open **API service → Shell** (or run locally with production `DATABASE_URL`):
+
+```bash
+pnpm --filter api exec prisma migrate deploy
+```
+
+Then seed or create a user and copy **`users.id`** for **`NEXT_PUBLIC_DEMO_USER_ID`** on Vercel.
+
+### Step 6 — Vercel env + redeploy
+
+Set **`NEXT_PUBLIC_API_URL`** to the Railway API URL and **`NEXT_PUBLIC_DEMO_USER_ID`** to that user id → **Redeploy** production on Vercel.
+
+### If Railway rejects `railway.toml`
+
+Delete or rename `railway.toml` temporarily, then in the **API** service **Settings → Build**: set **Dockerfile path** to `Dockerfile` at repository root and save.
+
+### Credits
+
+Railway is usage-based; watch the **Usage** tab so a sleeping MySQL + API does not surprise you on a hobby budget.
+

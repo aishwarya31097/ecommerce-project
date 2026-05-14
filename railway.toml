@@ -1,0 +1,6 @@
+# Tell Railway to build/run only what this Dockerfile defines (Nest API).
+# Vercel continues to deploy `apps/web` from the same repo — Railway never runs Next here.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
