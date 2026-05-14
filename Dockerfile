@@ -20,4 +20,6 @@ ENV NODE_ENV=production
 
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "api", "run", "start:prod"]
+# Same as `pnpm --filter api run start:prod`: cwd must be `apps/api` so `dist/main.js` resolves.
+WORKDIR /app/apps/api
+CMD ["node", "dist/main.js"]

@@ -88,7 +88,7 @@ Same GitHub repo is used everywhere. **Vercel** deploys `apps/web` only (you set
 | Where   | What runs | How this repo enforces it |
 | ------- | --------- | ------------------------- |
 | Vercel  | Next.js `apps/web` | Vercel project root = `apps/web` |
-| Railway | Nest `apps/api` + MySQL plugin | **`railway.toml`** → Docker build → **`CMD`** runs `pnpm --filter api run start:prod` |
+| Railway | Nest `apps/api` + MySQL plugin | **`railway.toml`** → Docker build → **`WORKDIR`** `apps/api` + **`node dist/main.js`** (same as `start:prod`) |
 
 ### Step 1 — Commit and push
 
@@ -113,12 +113,16 @@ Ensure these files are on `main` (or your deploy branch): **`Dockerfile`**, **`.
 
    | Name | Value |
    | ---- | ----- |
-   | `DATABASE_URL` | Reference from MySQL service, or paste `mysql://...` |
+   | `DATABASE_URL` | **Required.** Prisma only reads this exact name. On the API service → **Variables** → **New** → use **Reference** and pick your **MySQL** service’s connection URL variable (Railway often exposes something like `DATABASE_URL` or `MYSQL_URL` on the DB plugin—reference that into **`DATABASE_URL`** on the API). If you only pasted vars on the MySQL box, the API container will **not** see them until you add this reference here. |
    | `CORS_ORIGINS` | Your Vercel URL, e.g. `https://your-app.vercel.app` |
 
    Do **not** set `PORT` unless Railway docs say so — Railway injects **`PORT`**; Nest uses it.
 
-5. **Networking** → **Generate domain** → copy the HTTPS URL (your **`NEXT_PUBLIC_API_URL`** on Vercel).
+5. **Deploy / Start command:** leave **empty** so the **Dockerfile `CMD`** runs (`WORKDIR` `apps/api` then `node dist/main.js`). If you set a custom start command to `pnpm start` or `cd apps/api && pnpm start`, you will get **`nest start`** (dev) and confusing logs — remove it.
+
+**Where is `main.js`?** After `pnpm --filter api run build`, look under **`apps/api/dist/main.js`** (not the repo root). If it is missing locally, run the build from the monorepo root and fix any TypeScript errors.
+
+6. **Networking** → **Generate domain** → copy the HTTPS URL (your **`NEXT_PUBLIC_API_URL`** on Vercel).
 
 ### Step 5 — Database schema (once per environment)
 
@@ -137,6 +141,15 @@ Set **`NEXT_PUBLIC_API_URL`** to the Railway API URL and **`NEXT_PUBLIC_DEMO_USE
 ### If Railway rejects `railway.toml`
 
 Delete or rename `railway.toml` temporarily, then in the **API** service **Settings → Build**: set **Dockerfile path** to `Dockerfile` at repository root and save.
+
+### Railway: `DATABASE_URL` / `P1012` (env not found)
+
+If logs say **`Environment variable not found: DATABASE_URL`**:
+
+1. Open the **API** service (the one that runs your GitHub / Docker deploy), **not** only the MySQL service.
+2. **Variables** → confirm a variable named exactly **`DATABASE_URL`** exists **on this service**.
+3. If the URL lives on MySQL, add **`DATABASE_URL`** on the API service and set its value with **Variable reference** → choose the MySQL plugin → the variable that holds the full `mysql://...` URL.
+4. **Redeploy** after saving (Railway injects env at container start).
 
 ### Credits
 
