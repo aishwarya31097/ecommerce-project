@@ -11,6 +11,12 @@ export class OrdersController {
     return this.ordersService.checkout(dto);
   }
 
+  /** Must stay above `:userId` — both use a single path segment. */
+  @Get('detail/:orderId')
+  findOne(@Param('orderId') orderId: string) {
+    return this.ordersService.findOne(orderId);
+  }
+
   @Get(':userId')
   findByUser(@Param('userId') userId: string) {
     return this.ordersService.findByUser(userId);

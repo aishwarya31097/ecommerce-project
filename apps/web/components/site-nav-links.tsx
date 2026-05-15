@@ -7,6 +7,7 @@ const nav = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
   { href: "/cart", label: "Cart" },
+  { href: "/orders", label: "Orders" },
 ] as const;
 
 function isActive(pathname: string, href: string) {

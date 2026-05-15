@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PlaceOrderButton } from "@/components/cart/place-order-button";
 import { CartLineItem } from "./_components/cart-line-item";
 import { CartEmptyState } from "./_components/cart-empty-state";
 import { getCart } from "@/lib/api/cart";
@@ -68,7 +69,7 @@ export default async function CartPage() {
           Cart
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-          Items are saved for your demo account until checkout ships.
+          Review your bag, then place an order when you are ready.
         </p>
       </header>
 
@@ -92,10 +93,7 @@ export default async function CartPage() {
                   {formatMoney(cart.summary.subtotal)}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
-                Demo checkout coming later — totals update when you change
-                quantities.
-              </p>
+              <PlaceOrderButton />
             </div>
           </>
         )}
