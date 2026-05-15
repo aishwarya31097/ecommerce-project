@@ -189,9 +189,12 @@ Logs show `api@0.0.1 start` → `node dist/main.js` but **`dist/` was never buil
 3. **Settings → Deploy → Custom Start Command:** **empty** (use Dockerfile / `railway.toml` `node dist/main.js`). Remove `pnpm start` if set.
 4. **Redeploy** after pushing.
 
+**Stale TypeScript cache:** If `nest build` succeeds but `dist/main.js` is missing, delete `apps/api/tsconfig.build.tsbuildinfo` (or any `*.tsbuildinfo` next to `apps/api`) and rebuild. Nest’s `deleteOutDir` wipes `dist/` while an old cache file can make incremental compile emit nothing.
+
 **What the repo does now:**
 
-- **Dockerfile:** `pnpm run build:api` during image build + `test -f apps/api/dist/main.js`.
+- **Dockerfile:** strips stale `*.tsbuildinfo`, runs `pnpm run build:api`, then `test -f apps/api/dist/main.js`.
+- **`tsconfig.build.json`:** stores build cache at `dist/.tsbuildinfo` so it is cleared with `dist/`.
 - **`apps/api` `start` script:** runs `scripts/start-prod.cjs` — builds only if `dist/main.js` is missing (safety net if Railway runs `pnpm start`).
 - **Root `start`:** `build:api` then `start:prod` if the platform starts from monorepo root.
 

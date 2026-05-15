@@ -14,6 +14,7 @@ COPY . .
 
 RUN DATABASE_URL="mysql://prisma:prisma@127.0.0.1:3306/prisma_generate_placeholder" \
   pnpm install --frozen-lockfile \
+  && rm -f apps/api/tsconfig.build.tsbuildinfo apps/api/dist/.tsbuildinfo \
   && pnpm run build:api \
   && test -f apps/api/dist/main.js
 
