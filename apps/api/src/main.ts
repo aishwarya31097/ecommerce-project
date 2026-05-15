@@ -14,7 +14,7 @@ async function bootstrap() {
     origin:
       corsOrigins && corsOrigins.length > 0
         ? corsOrigins
-        : ['http://localhost:3000', 'http://127.0.0.1:3000',"https://ecommerce-project-repo.vercel.app"],
+        : ['http://localhost:3000', 'http://127.0.0.1:3000',"https://ecommerce-project-web.vercel.app"],
     credentials: true,
   });
 
