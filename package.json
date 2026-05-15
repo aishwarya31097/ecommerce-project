@@ -9,7 +9,7 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "start": "pnpm --filter api run start:prod"
+    "start": "pnpm run build:api && pnpm --filter api run start:prod"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

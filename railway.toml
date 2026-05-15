@@ -1,6 +1,13 @@
 # Tell Railway to build/run only what this Dockerfile defines (Nest API).
 # Vercel continues to deploy `apps/web` from the same repo — Railway never runs Next here.
+#
+# Railway UI: set Root Directory to repo root (`.`). Clear any custom Start Command
+# that runs `pnpm start` without a build — or use the Dockerfile CMD below.
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+
+[deploy]
+# Matches Dockerfile WORKDIR + CMD. Do not override with bare `pnpm start` in the UI.
+startCommand = "node dist/main.js"

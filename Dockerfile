@@ -14,7 +14,8 @@ COPY . .
 
 RUN DATABASE_URL="mysql://prisma:prisma@127.0.0.1:3306/prisma_generate_placeholder" \
   pnpm install --frozen-lockfile \
-  && pnpm run build:api
+  && pnpm run build:api \
+  && test -f apps/api/dist/main.js
 
 ENV NODE_ENV=production
 
