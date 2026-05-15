@@ -24,6 +24,12 @@ function run(command, args, options = {}) {
 
 if (!fs.existsSync(mainJs)) {
   console.log('[start-prod] dist/main.js missing — running nest build…');
+  for (const stale of [
+    path.join(apiRoot, 'tsconfig.build.tsbuildinfo'),
+    path.join(apiRoot, 'dist', '.tsbuildinfo'),
+  ]) {
+    if (fs.existsSync(stale)) fs.unlinkSync(stale);
+  }
   run('pnpm', ['run', 'build']);
   if (!fs.existsSync(mainJs)) {
     console.error('[start-prod] Build finished but dist/main.js is still missing.');
