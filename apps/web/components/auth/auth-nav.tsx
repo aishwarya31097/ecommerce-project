@@ -49,7 +49,7 @@ export function AuthNav() {
   }
 
   return (
-    <motionless className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <span className="hidden max-w-[140px] truncate text-sm text-zinc-500 sm:inline dark:text-zinc-400">
         {user.email}
       </span>
@@ -60,6 +60,6 @@ export function AuthNav() {
       >
         Sign out
       </button>
-    </motionless>
+    </div>
   );
 }
