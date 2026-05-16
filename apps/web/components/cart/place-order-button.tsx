@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { checkoutFromCart } from "@/lib/api/orders";
 import { ApiError } from "@/lib/api/client";
-import { getDemoUserId } from "@/lib/demo-user";
 
 const buttonClass =
   "w-full rounded-full bg-violet-600 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-violet-500 dark:hover:bg-violet-400";
@@ -18,10 +17,13 @@ export function PlaceOrderButton() {
     setError(null);
     setPending(true);
     try {
-      const userId = getDemoUserId();
-      const order = await checkoutFromCart({ userId });
+      const order = await checkoutFromCart();
       router.push(`/orders/${order.id}`);
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.push("/login?next=/cart");
+        return;
+      }
       const message =
         e instanceof ApiError ? e.message : "Could not place order.";
       setError(message);

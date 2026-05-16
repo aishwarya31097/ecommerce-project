@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
+import { AuthNav } from "@/components/auth/auth-nav";
 const nav = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
   { href: "/cart", label: "Cart" },
   { href: "/orders", label: "Orders" },
+
+  
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -37,6 +39,7 @@ export function SiteNavLinks() {
           </Link>
         );
       })}
+      <AuthNav />
     </nav>
   );
 }

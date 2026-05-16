@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './config';
-
+import { getAccessToken } from './auth/session';
 export class ApiError extends Error {
   status: number;
   details: unknown;
@@ -14,19 +14,26 @@ export class ApiError extends Error {
 
 type RequestOptions = RequestInit & {
   revalidateSeconds?: number;
+  cookieHeader?: string;
 };
 
 export async function apiFetch<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { revalidateSeconds, headers, ...rest } = options;
-
+  const { revalidateSeconds, cookieHeader, headers, ...rest } = options;
+  const bearer =
+  !cookieHeader && typeof window !== 'undefined'
+    ? getAccessToken()
+    : null;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),  
       ...headers,
     },
+    credentials: cookieHeader ? 'omit' : 'include',
     ...(revalidateSeconds !== undefined
       ? { next: { revalidate: revalidateSeconds } }
       : {}),

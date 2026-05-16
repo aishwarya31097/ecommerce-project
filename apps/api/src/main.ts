@@ -1,10 +1,11 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.use(cookieParser());
   // Browser requests from the Next.js app (different origin/port) need CORS for
   // POST/PATCH/DELETE cart calls. Server-side `fetch` from Next does not.
   const corsOrigins = process.env.CORS_ORIGINS?.split(',')

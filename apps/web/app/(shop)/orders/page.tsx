@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getOrders } from "@/lib/api/orders";
+
 import { ApiError } from "@/lib/api/client";
-import { getDemoUserId } from "@/lib/demo-user";
+import { redirect } from "next/navigation";
+import { getServerAuthHeaders } from "@/lib/api/auth/server";
+import { getMyOrders } from "@/lib/api/orders";
 
 export const metadata: Metadata = {
   title: "Orders",
@@ -24,11 +26,17 @@ function formatDate(iso: string) {
 }
 
 export default async function OrdersPage() {
-  let orders: Awaited<ReturnType<typeof getOrders>>;
+  const authHeaders = await getServerAuthHeaders();
+  if (!authHeaders.Authorization) {
+    redirect("/login?next=/orders");
+  }
+  let orders: Awaited<ReturnType<typeof getMyOrders>>;
   try {
-    const userId = getDemoUserId();
-    orders = await getOrders(userId, { revalidateSeconds: 0 });
+    orders = await getMyOrders({ revalidateSeconds: 0, headers: authHeaders });
   } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      redirect("/login?next=/orders");
+    }
     const message =
       e instanceof ApiError
         ? e.message

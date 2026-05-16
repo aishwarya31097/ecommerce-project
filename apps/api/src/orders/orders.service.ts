@@ -1,25 +1,16 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CreateOrderFromCartDto } from './dto/create-order-from-cart.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkout(dto: CreateOrderFromCartDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: dto.userId },
-      select: { id: true, email: true, name: true },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with id '${dto.userId}' not found`);
-    }
-
+  async checkout(userId: string) {
+   
     return this.prisma.$transaction(async (tx) => {
       const cartItems = await tx.cartItem.findMany({
-        where: { userId: dto.userId },
+        where: { userId: userId },
         include: {
           product: {
             select: { id: true, name: true, price: true },
@@ -38,7 +29,7 @@ export class OrdersService {
 
       const order = await tx.order.create({
         data: {
-          userId: dto.userId,
+          userId: userId,
           status: OrderStatus.PENDING,
           total,
         },
@@ -55,7 +46,7 @@ export class OrdersService {
       });
 
       await tx.cartItem.deleteMany({
-        where: { userId: dto.userId },
+        where: { userId: userId },
       });
 
       return tx.order.findUnique({
@@ -73,7 +64,7 @@ export class OrdersService {
     });
   }
 
-  async findOne(orderId: string) {
+  async findOne(orderId: string, userId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -86,11 +77,11 @@ export class OrdersService {
         },
       },
     });
-
-    if (!order) {
+  
+    if (!order || order.userId !== userId) {
       throw new NotFoundException(`Order with id '${orderId}' not found`);
     }
-
+  
     return order;
   }
 

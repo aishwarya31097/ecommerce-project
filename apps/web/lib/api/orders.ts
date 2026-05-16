@@ -28,22 +28,22 @@ export type OrderWithItems = {
   items: OrderItemWithProduct[];
 };
 
-export type CheckoutFromCartBody = {
-  userId: string;
-};
 
-export function checkoutFromCart(
-  body: CheckoutFromCartBody,
-): Promise<OrderWithItems> {
+
+export function checkoutFromCart(): Promise<OrderWithItems> {
   return apiFetch<OrderWithItems>('/orders/checkout', {
     method: 'POST',
-    body: JSON.stringify(body),
   });
 }
 
+type OrderFetchOptions = {
+  revalidateSeconds?: number;
+  headers?: Record<string, string>;
+};
+
 export function getOrderById(
   orderId: string,
-  options?: { revalidateSeconds?: number },
+  options?: OrderFetchOptions,
 ): Promise<OrderWithItems> {
   return apiFetch<OrderWithItems>(
     `/orders/detail/${encodeURIComponent(orderId)}`,
@@ -51,20 +51,18 @@ export function getOrderById(
       ...(options?.revalidateSeconds !== undefined
         ? { revalidateSeconds: options.revalidateSeconds }
         : {}),
+      headers: options?.headers,
     },
   );
 }
 
-export function getOrders(
-  userId: string,
-  options?: { revalidateSeconds?: number },
+export function getMyOrders(
+  options?: OrderFetchOptions,
 ): Promise<OrderWithItems[]> {
-  return apiFetch<OrderWithItems[]>(
-    `/orders/${encodeURIComponent(userId)}`,
-    {
-      ...(options?.revalidateSeconds !== undefined
-        ? { revalidateSeconds: options.revalidateSeconds }
-        : {}),
-    },
-  );
+  return apiFetch<OrderWithItems[]>('/orders/me', {
+    ...(options?.revalidateSeconds !== undefined
+      ? { revalidateSeconds: options.revalidateSeconds }
+      : {}),
+    headers: options?.headers,
+  });
 }

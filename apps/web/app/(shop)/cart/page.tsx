@@ -3,10 +3,10 @@ import Link from "next/link";
 import { PlaceOrderButton } from "@/components/cart/place-order-button";
 import { CartLineItem } from "./_components/cart-line-item";
 import { CartEmptyState } from "./_components/cart-empty-state";
-import { getCart } from "@/lib/api/cart";
 import { ApiError } from "@/lib/api/client";
-import { getDemoUserId } from "@/lib/demo-user";
-
+import { redirect } from "next/navigation";
+import { getMyCart } from "@/lib/api/cart";
+import { getServerAuthHeaders } from "@/lib/api/auth/server";
 export const metadata: Metadata = {
   title: "Cart",
   description: "Your shopping cart",
@@ -23,11 +23,17 @@ function formatMoney(n: number) {
 }
 
 export default async function CartPage() {
-  let cart: Awaited<ReturnType<typeof getCart>>;
+  const authHeaders = await getServerAuthHeaders();
+  if (!authHeaders.Authorization) {
+    redirect("/login?next=/cart");
+  }
+  let cart: Awaited<ReturnType<typeof getMyCart>>;
   try {
-    const userId = getDemoUserId();
-    cart = await getCart(userId, { revalidateSeconds: 0 });
+    cart = await getMyCart({ revalidateSeconds: 0, headers: authHeaders });
   } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      redirect("/login?next=/cart");
+    }
     const message =
       e instanceof ApiError
         ? e.message

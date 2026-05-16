@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import { addCartItem } from "@/lib/api/cart";
 import { ApiError } from "@/lib/api/client";
-import { getDemoUserId } from "@/lib/demo-user";
 
 type Props = {
   productId: string;
@@ -31,10 +30,13 @@ export function AddToCartButton({
     setError(null);
     setPending(true);
     try {
-      const userId = getDemoUserId();
-      await addCartItem({ userId, productId, quantity });
+      await addCartItem({ productId, quantity });
       router.refresh();
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        router.push(`/login?next=/products/${productId}`);
+        return;
+      }
       const message =
         e instanceof ApiError ? e.message : "Could not add to cart.";
       setError(message);

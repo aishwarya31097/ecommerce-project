@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerAuthHeaders } from "@/lib/api/auth/server";
 import { ApiError } from "@/lib/api/client";
 import { getOrderById } from "@/lib/api/orders";
 
@@ -30,9 +31,16 @@ function formatDate(iso: string) {
 
 export default async function OrderConfirmationPage({ params }: Props) {
   const { id } = await params;
+  const authHeaders = await getServerAuthHeaders();
+  if (!authHeaders.Authorization) {
+    redirect(`/login?next=/orders/${id}`);
+  }
 
   try {
-    const order = await getOrderById(id, { revalidateSeconds: 0 });
+    const order = await getOrderById(id, {
+      revalidateSeconds: 0,
+      headers: authHeaders,
+    });
 
     return (
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -112,6 +120,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
       </div>
     );
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      redirect(`/login?next=/orders/${id}`);
+    }
     if (error instanceof ApiError && error.status === 404) {
       notFound();
     }

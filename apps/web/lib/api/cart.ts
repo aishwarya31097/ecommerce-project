@@ -36,7 +36,7 @@ export type GetCartResponse = {
 };
 
 export type AddCartItemBody = {
-  userId: string;
+
   productId: string;
   quantity: number;
 };
@@ -93,4 +93,17 @@ export function removeCartItem(itemId: string): Promise<RemovedCartItem> {
       method: 'DELETE',
     },
   );
+}
+type CartFetchOptions = {
+  revalidateSeconds?: number;
+  headers?: Record<string, string>;
+};
+
+export function getMyCart(options?: CartFetchOptions): Promise<GetCartResponse> {
+  return apiFetch<GetCartResponse>('/cart/me', {
+    ...(options?.revalidateSeconds !== undefined
+      ? { revalidateSeconds: options.revalidateSeconds }
+      : {}),
+    headers: options?.headers,
+  });
 }
