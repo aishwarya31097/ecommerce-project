@@ -15,8 +15,14 @@ async function bootstrap() {
     origin:
       corsOrigins && corsOrigins.length > 0
         ? corsOrigins
-        : ['http://localhost:3000', 'http://127.0.0.1:3000',"https://ecommerce-project-web.vercel.app"],
+        : [
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'https://ecommerce-project-web.vercel.app',
+          ],
     credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(new ValidationPipe({
