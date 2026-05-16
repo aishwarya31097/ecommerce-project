@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { setServerSessionToken } from "@/lib/api/auth/actions";
 import { setAccessToken } from "@/lib/api/auth/session";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/products";
 
@@ -25,9 +23,8 @@ export function LoginForm() {
     try {
       const { accessToken } = await login({ email, password });
       setAccessToken(accessToken);
-      await setServerSessionToken(accessToken);
-      router.push(next);
-      router.refresh();
+      // Full page load so /cart and /orders Server Components receive the cookie.
+      window.location.assign(next);
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "Could not sign in.",

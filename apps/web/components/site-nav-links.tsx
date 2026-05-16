@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthNav } from "@/components/auth/auth-nav";
+import { syncSessionCookie } from "@/lib/api/auth/session";
 const nav = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
@@ -31,6 +32,11 @@ export function SiteNavLinks() {
             key={item.href}
             href={item.href}
             prefetch={prefetch}
+            onClick={
+              item.href === "/cart" || item.href === "/orders"
+                ? () => syncSessionCookie()
+                : undefined
+            }
             aria-current={active ? "page" : undefined}
             className={`rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
               active

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
+import { syncSessionCookie } from "@/lib/api/auth/session";
 import { addCartItem } from "@/lib/api/cart";
 import { ApiError } from "@/lib/api/client";
 
@@ -31,6 +32,7 @@ export function AddToCartButton({
     setPending(true);
     try {
       await addCartItem({ productId, quantity });
+      syncSessionCookie();
       router.refresh();
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {

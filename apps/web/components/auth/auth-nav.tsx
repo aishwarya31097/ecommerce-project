@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { clearServerSessionToken } from "@/lib/api/auth/actions";
 import { getMe, logout, type AuthUser } from "@/lib/api/auth";
-import { clearAccessToken, getAccessToken } from "@/lib/api/auth/session";
+import {
+  clearAccessToken,
+  getAccessToken,
+  syncSessionCookie,
+} from "@/lib/api/auth/session";
 
 export function AuthNav() {
   const router = useRouter();
@@ -20,6 +23,7 @@ export function AuthNav() {
       setReady(true);
       return;
     }
+    syncSessionCookie();
     setReady(false);
     getMe()
       .then((res) => setUser(res.user))
@@ -34,7 +38,6 @@ export function AuthNav() {
       // still clear local session if API fails
     }
     clearAccessToken();
-    await clearServerSessionToken();
     setUser(null);
     router.push("/");
     router.refresh();
