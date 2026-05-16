@@ -32,11 +32,7 @@ export function AuthNav() {
   }, [pathname]);
 
   async function handleSignOut() {
-    try {
-      await logout();
-    } catch {
-      // still clear local session if API fails
-    }
+    await logout();
     clearAccessToken();
     setUser(null);
     router.push("/");
