@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { register } from "@/lib/api/auth";
+import { setServerSessionToken } from "@/lib/api/auth/actions";
+import { setAccessToken } from "@/lib/api/auth/session";
 import { ApiError } from "@/lib/api/client";
 
 export function RegisterForm() {
@@ -21,8 +23,10 @@ export function RegisterForm() {
     setError(null);
     setPending(true);
     try {
-      await register({ email, password });
-      router.push("/login");
+      const { accessToken } = await register({ email, password });
+      setAccessToken(accessToken);
+      await setServerSessionToken(accessToken);
+      router.push(next);
       router.refresh();
     } catch (err) {
       setError(

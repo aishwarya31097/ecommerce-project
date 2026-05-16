@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { setAccessToken } from '@/lib/api/auth/session';
+import { setServerSessionToken } from "@/lib/api/auth/actions";
+import { setAccessToken } from "@/lib/api/auth/session";
 
 export function LoginForm() {
   const router = useRouter();
@@ -22,9 +23,10 @@ export function LoginForm() {
     setError(null);
     setPending(true);
     try {
-        const { user, accessToken } = await login({ email, password });
-        setAccessToken(accessToken);
-        router.push(next);
+      const { accessToken } = await login({ email, password });
+      setAccessToken(accessToken);
+      await setServerSessionToken(accessToken);
+      router.push(next);
       router.refresh();
     } catch (err) {
       setError(

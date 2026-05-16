@@ -24,10 +24,13 @@ export function SiteNavLinks() {
     <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main">
       {nav.map((item) => {
         const active = isActive(pathname, item.href);
+        const prefetch =
+          item.href === "/cart" || item.href === "/orders" ? false : undefined;
         return (
           <Link
             key={item.href}
             href={item.href}
+            prefetch={prefetch}
             aria-current={active ? "page" : undefined}
             className={`rounded-md px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950 ${
               active
