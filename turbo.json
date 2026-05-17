@@ -1,7 +1,14 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["PORT", "DATABASE_URL", "CORS_ORIGINS"],
+  "globalEnv": [  "PORT",
+  "DATABASE_URL",
+  "CORS_ORIGINS",
+  "NODE_ENV",
+  "NEXT_PUBLIC_API_URL",
+  "NEXT_PUBLIC_DEMO_USER_ID",
+  "NEXT_PUBLIC_SITE_URL",
+"JWT_SECRET"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

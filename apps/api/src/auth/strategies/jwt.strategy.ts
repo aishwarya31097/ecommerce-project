@@ -9,10 +9,10 @@ import type { AuthUser } from '../types/auth-user.type';
 type JwtPayload = { sub: string; email: string };
 
 function tokenFromCookie(req: Request): string | null {
-  const token = req.cookies?.[AUTH_COOKIE_NAME];
+  const cookies = req.cookies as Record<string, string | undefined> | undefined;
+  const token = cookies?.[AUTH_COOKIE_NAME];
   return typeof token === 'string' && token.length > 0 ? token : null;
 }
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
